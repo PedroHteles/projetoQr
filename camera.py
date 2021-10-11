@@ -70,9 +70,9 @@ def lerqr(x,height,width):
                         print('aguardando Endereco')
                         leituraProduto.clear()
                     elif len(leituraEndereco) > 1:
-                        print('mais de 1 endereco encontrado!') 
+                        print('mais de 1 endereco encontrado!',leituraEndereco) 
                     elif len(leituraProduto) > 1:
-                        print(' mais de 1 produto encontrado')
+                        print(' mais de 1 produto encontrado',leituraProduto)
                     else:
                         valor = (leituraEndereco,leituraProduto)
                         return valor  
