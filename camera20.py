@@ -86,7 +86,8 @@ if webcam.isOpened():
         validacao, frame = webcam.read()
         height, width, channels = frame.shape
         lerqr(frame,height,width)
-            
+
+   
 
         cv2.imshow("camera",frame)
         cv2.waitKey(5)
