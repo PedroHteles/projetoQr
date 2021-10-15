@@ -26,6 +26,7 @@ def lerqr(imagem,height,width):
                     pass
                 else:
                     cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 15)
+                    print('erro')
 
                 if len(leituraEndereco) + len(leituraProduto) == len(decode(img)) and len(decode(imagem)) >2:
                     print(' mais de 2 qr encontrado')
@@ -66,7 +67,7 @@ while True:
     img = cv2.imread('./img/image0.jpg')
     height, width, channels = img.shape
     result = lerqr(img,height,width)
-    # print(result)
+    print(result)
     for leitura in decode(img):
         (x, y, w, h) = leitura.rect
         if result and len(result) == 2 :
@@ -80,11 +81,7 @@ while True:
                         cv2.rectangle(img, (x, y), (x + w, y + h), (0,255,0), 15)
         else:
             cv2.rectangle(img, (x, y), (x + w, y + h), (0,0,255), 15)
-    # modulo = leituraProduto[0:2]
-    # rua = leituraProduto[2:6]
-    # predio = leituraProduto[6:9]
-    # endereco = leituraProduto[9:12]
-    # produto = leituraProduto[12:]
+
   
     cv2.imshow("camera",img)
     key = cv2.waitKey(5)
