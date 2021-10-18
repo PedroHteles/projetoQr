@@ -27,6 +27,12 @@ def lerqr(imagem,height,width):
         leituraArea = x < (end_point[0]-w) and x > start_point[0] and y < (end_point[1]-h) and y > start_point[1] 
         try:
             if leituraArea:
+                
+                if validado !=[]:
+                    for i in validado:
+                        if barcodeData in i:
+                            return barcodeData
+
                 if len(barcodeData) ==16 and leituraEndereco !=[]:
                     if barcodeData not in leituraProduto:
                         leituraProduto.append(barcodeData)
@@ -86,7 +92,6 @@ if webcam.isOpened():
             produto = (result[1][0])
             endereco = (result[0][0])
             valor = (endereco,produto)
-            print(valor)
             if endereco:
 
                 conn = engine.connect()
@@ -95,16 +100,11 @@ if webcam.isOpened():
                 teste = result1.all()
                 
                 if teste != []:
-                    print(teste)
                     if teste[0][0] == 1 and valor not in validado:
-                        print('teste')
                         validado.append(valor)
-                        print('teste2')
                 else:
-                    print(teste)
                     print('Nao encontrado !')
 
-                print(validado,'b1')
 
                 for leitura in decode(frame):
                             (x, y, w, h) = leitura.rect
