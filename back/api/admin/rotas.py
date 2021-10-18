@@ -1,3 +1,6 @@
+from functools import partial
+
+from sqlalchemy.dialects.mysql.base import RESERVED_WORDS
 from api import engine
 from api.admin.models import projetoEstoque
 from flask import Flask,request,jsonify 
@@ -9,6 +12,7 @@ import numpy as np
 
 leituraProduto = []
 leituraEndereco = []
+validado = []
 webcam = cv2.VideoCapture(0)
 
 
@@ -23,7 +27,7 @@ def lerqr(imagem,height,width):
         leituraArea = x < (end_point[0]-w) and x > start_point[0] and y < (end_point[1]-h) and y > start_point[1] 
         try:
             if leituraArea:
-                if len(barcodeData) ==16:
+                if len(barcodeData) ==16 and leituraEndereco !=[]:
                     if barcodeData not in leituraProduto:
                         leituraProduto.append(barcodeData)
                     pass
@@ -31,11 +35,8 @@ def lerqr(imagem,height,width):
                     if barcodeData not in leituraEndereco:
                         leituraEndereco.append(barcodeData)
                     pass
-                else:
-                    text = 'qr invalido'
-                    cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 15)
-                    cv2.putText(imagem, text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX,0.5, (0, 0, 255), 2)
 
+        
                 if len(leituraEndereco) + len(leituraProduto) == len(decode(imagem)) and len(decode(imagem)) >2:
                     print(' mais de 2 qr encontrado')
                     valor = (leituraEndereco,leituraProduto)
@@ -47,25 +48,29 @@ def lerqr(imagem,height,width):
                         leituraEndereco.clear()
 
                 elif len(decode(imagem)) ==2:
-                    if barcodeData in leituraProduto and len(leituraEndereco) !=1 or len(leituraProduto) ==2:
+                    if barcodeData in leituraProduto and len(leituraEndereco) != 1 or len(leituraProduto) ==2:
                         leituraEndereco.clear()
-                    elif barcodeData in leituraEndereco and len(leituraProduto) !=1 or len(leituraEndereco) ==2:
+                    elif barcodeData in leituraEndereco and len(leituraProduto) != 1 or len(leituraEndereco) ==2:
                         leituraProduto.clear()
                 
                 if len(leituraEndereco) + len(leituraProduto) == len(decode(imagem)):
-                    if len(leituraEndereco) ==1 and len(leituraProduto) ==0:
+                    if len(leituraEndereco) == 1 and len(leituraProduto) ==0:
                         print('aguardando Produto')
+                        cv2.rectangle(imagem, (x, y), (x + w, y + h), (255,0,0), 25)
                         leituraEndereco.clear()
                     elif len(leituraProduto) ==1 and len(leituraEndereco) ==0:
                         print('aguardando Endereco')
                         leituraProduto.clear()
                     elif len(leituraEndereco) >1:
                         print('mais de 1 endereco encontrado!',leituraEndereco) 
+
                     elif len(leituraProduto) >1:
-                        print('mais de 1 produto encontrado',leituraProduto)        
+                        print('mais de 1 produto encontrado',leituraProduto)       
+
                     else:
-                        valor = (leituraEndereco,leituraProduto)
-                        return valor 
+                        if len(leituraEndereco) + len(leituraProduto) == len(decode(imagem)):
+                            valor = (leituraEndereco,leituraProduto)
+                            return valor 
             else:
                 cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 25)
         except:
@@ -77,43 +82,46 @@ if webcam.isOpened():
         validacao, frame = webcam.read()
         height, width, channels = frame.shape
         result = lerqr(frame,height,width)
-        print(result)
+        
         if result and len(result) == 2:
             produto = (result[1][0])
             endereco = (result[0][0])
+            valor = (endereco,produto)
+            print(valor)
             if endereco:
-                print(endereco,produto)
+
                 conn = engine.connect()
                 s = select(projetoEstoque.c.status).where(projetoEstoque.c.endereco == endereco)
                 result1 = conn.execute(s)
-                teste = (result1.one())[0]
+                teste = result1.all()
+                
+                if teste != []:
+                    print(teste)
+                    if teste[0][0] == 1 and valor not in validado:
+                        print('teste')
+                        validado.append(valor)
+                        print('teste2')
+                else:
+                    print(teste)
+                    print('Nao encontrado !')
 
-
-
-                for leitura in decode(frame):
-                        (x, y, w, h) = leitura.rect
-                        start_point = (int(width / 8), int(height  / 8))
-                        end_point = (int(width / 1.15), int(height / 1.15))
-                        leituraArea = x < (end_point[0] - w) and x > start_point[0] and y < (end_point[1] - h ) and y > start_point[1] 
-                        barcodeData = leitura.data.decode("utf-8")
-                        if leitura:
-                            for i in result:
-                                if teste == 1:
-                                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
-
-
-
-                if teste == 1:
-                    # cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 25)
-                        print(teste,'ja validado')
+                print(validado,'b1')
+                #     else:
+                #         print(teste,'a')
                 # else:
-                #     s1 = select(projetoEstoque).where(projetoEstoque.c.endereco == endereco,projetoEstoque.c.produto == produto)
-                #     result1 = conn.execute(s1)
-                #     if result1 !=[]:
-                #         tmt = projetoEstoque.update().where(projetoEstoque.c.endereco == endereco).values(status=1)
-                #         conn.execute(tmt)
-                #         leituraEndereco.clear()
-                #         leituraProduto.clear()
+                #     print('n')
+                # print(validado,'VALIDADO')    
+                # else:
+                #     for leitura in decode(frame):
+                #                 (x, y, w, h) = leitura.rect
+                #                 barcodeData = leitura.data.decode("utf-8")
+                #                 for i in validado:
+                #                     for o in i:
+                #                         if o[0] == barcodeData:
+                #                             cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
+
+
+
 
         cv2.imshow("camera",frame)
         cv2.waitKey(5)
