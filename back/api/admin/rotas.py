@@ -28,10 +28,10 @@ def lerqr(imagem,height,width):
         try:
             if leituraArea:
                 
-                if validado !=[]:
-                    for i in validado:
-                        if barcodeData in i:
-                            return barcodeData
+                # if validado !=[]:
+                #     for i in validado:
+                #         if barcodeData in i:
+                #             return barcodeData
 
                 if len(barcodeData) ==16 and leituraEndereco !=[]:
                     if barcodeData not in leituraProduto:
@@ -68,18 +68,16 @@ def lerqr(imagem,height,width):
                         leituraProduto.clear()
                     elif len(leituraEndereco) >1:
                         print('mais de 1 endereco encontrado!',leituraEndereco) 
-
                     elif len(leituraProduto) >1:
                         print('mais de 1 produto encontrado',leituraProduto)       
-
                     else:
                         if len(leituraEndereco) + len(leituraProduto) == len(decode(imagem)):
                             valor = (leituraEndereco,leituraProduto)
                             return valor 
             else:
-                cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 25)
+                cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 5)
         except:
-            cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 25)
+            cv2.rectangle(imagem, (x, y), (x + w, y + h), (0,0,255), 5)
 
 if webcam.isOpened():
     validacao, frame = webcam.read()
@@ -97,13 +95,17 @@ if webcam.isOpened():
                 conn = engine.connect()
                 s = select(projetoEstoque.c.status).where(projetoEstoque.c.endereco == endereco)
                 result1 = conn.execute(s)
-                teste = result1.all()
+                resultado = result1.all()
                 
-                if teste != []:
-                    if teste[0][0] == 1 and valor not in validado:
+                if resultado != []:
+                    if resultado[0][0] == 1 and valor not in validado:
                         validado.append(valor)
                     else:
-                        print('testre')
+                        if valor not in validado:
+                            if resultado[0][0] == 0:
+                                teste = projetoEstoque.update().where(projetoEstoque.c.endereco == endereco, projetoEstoque.c.produto == produto).values(status=1)
+                                result1 = conn.execute(teste)
+                        
                 else:
                     print('Nao encontrado !')
 
