@@ -1,13 +1,9 @@
-from functools import partial
-
-from sqlalchemy.dialects.mysql.base import RESERVED_WORDS
 from api import engine
 from api.admin.models import projetoEstoque
-from flask import Flask,request,jsonify 
 from sqlalchemy.sql import select
 import cv2
 from pyzbar.pyzbar import decode
-import numpy as np
+import simplejson as json
 
 
 leituraProduto = []
@@ -93,22 +89,26 @@ if webcam.isOpened():
             if endereco:
 
                 conn = engine.connect()
-                s = select(projetoEstoque.c.status).where(projetoEstoque.c.endereco == endereco)
+                s = select(projetoEstoque.c.status).where(projetoEstoque.c.endereco == endereco, projetoEstoque.c.produto == produto)
                 result1 = conn.execute(s)
                 resultado = result1.all()
                 
                 if resultado != []:
-                    if resultado[0][0] == 1 and valor not in validado:
-                        validado.append(valor)
+                    # if resultado[0][0] == 1 and valor not in validado:
+                    #     validado.append(valor)
+                    if resultado[0][0] == 1:
+                        print('oka')
                     else:
-                        if valor not in validado:
-                            if resultado[0][0] == 0:
-                                teste = projetoEstoque.update().where(projetoEstoque.c.endereco == endereco, projetoEstoque.c.produto == produto).values(status=1)
-                                result1 = conn.execute(teste)
-                        
+                        # if valor not in validado:
+                        if resultado[0][0] == 0:
+                            teste = projetoEstoque.update().where(projetoEstoque.c.endereco == endereco, projetoEstoque.c.produto == produto).values(status=1)
+                            resul = conn.execute(teste)   
                 else:
                     print('Nao encontrado !')
-
+                    s = select(projetoEstoque.c.produto).where(projetoEstoque.c.endereco == endereco)
+                    result1 = conn.execute(s)
+                    aopa = result1.one()[0]
+                    print(aopa)
 
         for leitura in decode(frame):
                     (x, y, w, h) = leitura.rect
