@@ -36,7 +36,6 @@ def lerqr(imagem,height,width):
                         leituraEndereco.append(barcodeData)
                     pass
 
-        
                 if len(leituraEndereco) + len(leituraProduto) == len(decode(imagem)) and len(decode(imagem)) >2:
                     print(' mais de 2 qr encontrado')
                     valor = (leituraEndereco,leituraProduto)
@@ -106,19 +105,14 @@ if webcam.isOpened():
                     print('Nao encontrado !')
 
                 print(validado,'b1')
-                #     else:
-                #         print(teste,'a')
-                # else:
-                #     print('n')
-                # print(validado,'VALIDADO')    
-                # else:
-                #     for leitura in decode(frame):
-                #                 (x, y, w, h) = leitura.rect
-                #                 barcodeData = leitura.data.decode("utf-8")
-                #                 for i in validado:
-                #                     for o in i:
-                #                         if o[0] == barcodeData:
-                #                             cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
+
+                for leitura in decode(frame):
+                            (x, y, w, h) = leitura.rect
+                            barcodeData = leitura.data.decode("utf-8")
+                            for i in validado:
+                                for o in i:
+                                    if o == barcodeData:
+                                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
 
 
 
