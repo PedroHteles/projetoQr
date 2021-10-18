@@ -102,18 +102,19 @@ if webcam.isOpened():
                 if teste != []:
                     if teste[0][0] == 1 and valor not in validado:
                         validado.append(valor)
+                    else:
+                        print('testre')
                 else:
                     print('Nao encontrado !')
 
 
-                for leitura in decode(frame):
-                            (x, y, w, h) = leitura.rect
-                            barcodeData = leitura.data.decode("utf-8")
-                            for i in validado:
-                                for o in i:
-                                    if o == barcodeData:
-                                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
-
+        for leitura in decode(frame):
+                    (x, y, w, h) = leitura.rect
+                    barcodeData = leitura.data.decode("utf-8")
+                    for i in validado:
+                        for o in i:
+                            if o == barcodeData:
+                                cv2.rectangle(frame, (x, y), (x + w, y + h), (0,255,0), 25)
 
 
 
