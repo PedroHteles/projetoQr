@@ -11,12 +11,12 @@ endereco = []
 produto = []
 
 def lerqr(frame):
-    print(len(pyzbar.decode(frame)),'aaaaaaaaaaaaaaaaaaaaa')
     for barcode in pyzbar.decode(frame):
         (x, y, w, h) = barcode.rect
         leituraArea = x < (end_point[0]-w) and x > start_point[0] and y < (end_point[1]-h) and y > start_point[1] 
         if leituraArea:
             barcodeData = barcode.data.decode("utf-8")
+            print(barcodeData)
             if len(barcodeData) == 12:
                 if barcodeData not in endereco:
                     endereco.append(barcodeData)
@@ -37,6 +37,7 @@ while True:
     cv2.rectangle(img, start_point, end_point,(255,0,0),2)
 
     result = lerqr(img)
+    print(result)
     if result:
         resultados = (result[0],result[1])
         for barcode in pyzbar.decode(img):
