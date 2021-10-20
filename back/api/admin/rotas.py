@@ -27,6 +27,7 @@ def lerqr(frame):
                 pass
             if len(endereco) >=1 and len(produto) >= 1:
                 if((len(endereco) + len(produto) )% 2 == 0):
+                    print(endereco[-1],produto[-1])
                     valor = [endereco,produto]
                     return valor
 while True:
