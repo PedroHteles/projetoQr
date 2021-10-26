@@ -1,4 +1,3 @@
-
 from ctypes import resize
 from os import O_TRUNC, closerange
 import cv2
@@ -7,20 +6,76 @@ from pyzbar.pyzbar import decode
 import json
 import numpy as np
 
-
         
-while True:
-    img = cv2.imread('./img/dirnal.png')
-    height, width, channels = img.shape
-    for barcode in decode(img):
-        (x, y, w, h) = barcode.rect
+
+produtos = []
+enderecos = []
+
+lista = []
+
+
+
+
+img = cv2.imread('./img/dinal.png')
+height, width, channels = img.shape
+barcodeList = decode(img)
+if len(barcodeList) <= 4:
+    for barcode in barcodeList:
+        # (x, y, w, h) = barcode.rect
         barcodeData = barcode.data.decode("utf-8")
-        barcodeType = barcode.type
-        cv2.rectangle(img, (x, y), (x + w, y + h), (0,255, 0), 2)
 
-        print(barcodeData)
+        if len(barcodeData) == 16:
+            produtos.append(barcode)
+        elif len(barcodeData) == 12:
+            enderecos.append(barcode)
 
-    cv2.imshow("camera",img)
-    key = cv2.waitKey(5)
-    if key == 27:
-        break
+        # print(x, y, w, h,barcodeData,len(barcodeData))
+    for i,p in enumerate(produtos):
+        print(i)
+        (xp, yp, wp, hp) = p.rect
+        distanciaTemp = ''
+        enderecoTemp = ''
+        indexTemp = ''
+        list = {
+            'endereco':'',
+            'produto':p.data.decode("utf-8"),
+            'status':''
+        }
+        for j,e in enumerate(enderecos):
+            if j == 0:
+                (xe, ye, we, he) = e.rect
+                enderecoTemp = e.data.decode("utf-8")
+                distanciaTemp = ((xe - xp)**2 + (ye - yp )**2)**0.5
+                indexTemp = j
+            else:
+                (xe, ye, we, he) = e.rect
+                if ((xe - xp)**2 + (ye - yp )**2)**0.5 < distanciaTemp:
+                    enderecoTemp = e.data.decode("utf-8")
+                    distanciaTemp = ((xe - xp)**2 + (ye - yp )**2)**0.5
+                    indexTemp = j
+
+        if enderecoTemp in list['produto']: 
+            list['status'] = 'ok'
+        else:
+            list['status'] = 'erro'
+
+        list['endereco'] = enderecoTemp
+        enderecos.pop(indexTemp)
+        lista.append(list)
+            
+else:
+    print('teste')
+
+if len(enderecos) > 0:
+    for e in enderecos:
+        list = {
+                'endereco':e.data.decode("utf-8"),
+                'produto':'',
+                'status':'Nao LEU'
+            }
+        lista.append(list)
+
+print(lista)
+
+cv2.imshow("camera",img)
+key = cv2.waitKey(5)
