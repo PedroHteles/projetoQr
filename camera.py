@@ -24,9 +24,9 @@ if len(barcodeList) <= 4:
         # (x, y, w, h) = barcode.rect
         barcodeData = barcode.data.decode("utf-8")
 
-        if len(barcodeData) == 16:
+        if 'QR01' in barcodeData:
             produtos.append(barcode)
-        elif len(barcodeData) == 12:
+        elif 'QR02' in barcodeData:
             enderecos.append(barcode)
 
         # print(x, y, w, h,barcodeData,len(barcodeData))
@@ -54,7 +54,7 @@ if len(barcodeList) <= 4:
                     distanciaTemp = ((xe - xp)**2 + (ye - yp )**2)**0.5
                     indexTemp = j
 
-        if enderecoTemp in list['produto']: 
+        if enderecoTemp[4:] in list['produto'][4:]: 
             list['status'] = 'ok'
         else:
             list['status'] = 'erro'
